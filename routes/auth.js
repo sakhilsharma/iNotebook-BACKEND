@@ -51,7 +51,7 @@ router.post('/createuser', [ //validation using express-validator
             res.json(user);
         } catch (error) {
             console.log(error.message);
-            res.status(500).send("Some error occured");
+            res.status(500).send("please enter valid credentials")
         }
 
     }
@@ -84,8 +84,9 @@ router.post('/login', [ //validation using express-validator
         const data = {
             user: { id: user.id }
         }
+        console.log(data);
         //token creater(contain info of user)
-        const authtoken = jwt.sign({ data }, JWT_SECRET);
+        const authtoken = jwt.sign(data, JWT_SECRET);
 
         //send JWT as response or via cookies
         res.json({ authtoken });
@@ -100,7 +101,7 @@ router.post('/login', [ //validation using express-validator
 router.post('/getuser', fetchuser, async (req, res) => {
     try {
         let userId = req.user.id; //from middleware Fetchuser
-        const user = await User.findById( userId ).select("-password"); //eccept every feild except password 
+        const user = await User.findById(userId).select("-password"); //eccept every feild except password 
         res.send(user);
     }
     catch (error) {
