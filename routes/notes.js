@@ -60,17 +60,34 @@ router.put('/updatenote/:id', fetchuser, async (req, res) => {
     }
     //to check the user /verify user
     //find the note to be updated and update it
-    let note = await Notes.findById(req.param.id);
+    let note = await Notes.findById(req.params.id);
     if (!note) {
         res.status(404).send("Not Found");
     }
     if (note.user.toString() !== req.user.id) {
         return res.status(401).send("Not Allowed"); // dont allow externel user to access the note of other
     }
-     
+
     note = await Notes.findByIdAndUpdate(req.params.id, { $set: newNote }, { new: true });//update note and add new user if no note exist { $set: newNote }
     res.json({ note });
 })
 
+//Route 3:Delete an existing note using : DELETE '/api/notes/deletenote Login required
+router.delete('/deletenote/:id',fetchuser , async (req, res) => {
+
+    //Find the note to be deleted and delete it
+    let note = await Notes.findById(req.params.id);
+    if (!note) {
+        res.status(404).send("Not Found");
+    }
+    //Allow deletion only if user owns the note
+    if (note.user.toString() !== req.user.id) {
+        return res.status(401).send("Not Allowed"); // dont allow externel user to access the note of other
+    }
+
+    note = await Notes.findByIdAndDelete(req.params.id);//update note and add new user if no note exist { $set: newNote }
+    res.json({ "Success": "Note has been deleted" });
+}
+)
 
 module.exports = router;
