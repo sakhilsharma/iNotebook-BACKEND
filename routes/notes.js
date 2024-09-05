@@ -47,46 +47,56 @@ router.post('/addnote', fetchuser, [
 router.put('/updatenote/:id', fetchuser, async (req, res) => {
     const { title, description, tag } = req.body;
     console.log(req.body);
-    //Create a newNote Object
-    const newNote = {};
-    if (title) {
-        newNote.title = title; //update titlw if title is part of request
-    }
-    if (description) {
-        description.title = description; //update titlw if title is part of request
-    }
-    if (tag) {
-        tag.title = tag; //update title if title is part of request
-    }
-    //to check the user /verify user
-    //find the note to be updated and update it
-    let note = await Notes.findById(req.params.id);
-    if (!note) {
-        res.status(404).send("Not Found");
-    }
-    if (note.user.toString() !== req.user.id) {
-        return res.status(401).send("Not Allowed"); // dont allow externel user to access the note of other
-    }
+    try {
+        //Create a newNote Object
+        const newNote = {};
+        if (title) {
+            newNote.title = title; //update titlw if title is part of request
+        }
+        if (description) {
+            description.title = description; //update titlw if title is part of request
+        }
+        if (tag) {
+            tag.title = tag; //update title if title is part of request
+        }
+        //to check the user /verify user
+        //find the note to be updated and update it
+        let note = await Notes.findById(req.params.id);
+        if (!note) {
+            res.status(404).send("Not Found");
+        }
+        if (note.user.toString() !== req.user.id) {
+            return res.status(401).send("Not Allowed"); // dont allow externel user to access the note of other
+        }
 
-    note = await Notes.findByIdAndUpdate(req.params.id, { $set: newNote }, { new: true });//update note and add new user if no note exist { $set: newNote }
-    res.json({ note });
+        note = await Notes.findByIdAndUpdate(req.params.id, { $set: newNote }, { new: true });//update note and add new user if no note exist { $set: newNote }
+        res.json({ note });
+    }
+    catch (error) {
+        res.status(500).send("Internel Server Error");
+    }
 })
 
 //Route 3:Delete an existing note using : DELETE '/api/notes/deletenote Login required
-router.delete('/deletenote/:id',fetchuser , async (req, res) => {
+router.delete('/deletenote/:id', fetchuser, async (req, res) => {
+    try {
+        //Find the note to be deleted and delete it
+        let note = await Notes.findById(req.params.id);
+        if (!note) {
+            res.status(404).send("Not Found");
+        }
+        //Allow deletion only if user owns the note
+        if (note.user.toString() !== req.user.id) {
+            return res.status(401).send("Not Allowed"); // dont allow externel user to access the note of other
+        }
 
-    //Find the note to be deleted and delete it
-    let note = await Notes.findById(req.params.id);
-    if (!note) {
-        res.status(404).send("Not Found");
+        note = await Notes.findByIdAndDelete(req.params.id);//update note and add new user if no note exist { $set: newNote }
+        res.json({ "Success": "Note has been deleted" });
     }
-    //Allow deletion only if user owns the note
-    if (note.user.toString() !== req.user.id) {
-        return res.status(401).send("Not Allowed"); // dont allow externel user to access the note of other
+    catch (error) {
+        res.status(500).send("Internel Server Error");
     }
 
-    note = await Notes.findByIdAndDelete(req.params.id);//update note and add new user if no note exist { $set: newNote }
-    res.json({ "Success": "Note has been deleted" });
 }
 )
 

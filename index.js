@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const ConnectWithMoongoose = require('./db.js');
-app.listen(5000, (req, res) => {
+app.listen(4000, (req, res) => {
     console.log("connected");
 })
 app.use(express.json());
